@@ -8,6 +8,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,8 +19,10 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.handler.UserRoleAuthorizationInterceptor;
 
 import com.cloudage.membercenter.entity.Article;
+import com.cloudage.membercenter.entity.Comment;
 import com.cloudage.membercenter.entity.User;
 import com.cloudage.membercenter.service.IArticleService;
+import com.cloudage.membercenter.service.ICommentService;
 import com.cloudage.membercenter.service.IUserService;
 
 @RestController
@@ -31,6 +34,9 @@ public class APIController {
 
 	@Autowired
 	IArticleService articleService;
+
+	@Autowired
+	ICommentService commentService;
 
 	@RequestMapping(value = "/hello", method=RequestMethod.GET)
 	public @ResponseBody String hello(){
@@ -119,5 +125,42 @@ public class APIController {
 		article.setTitle(title);
 		article.setText(text);
 		return articleService.save(article);
+	}
+
+	@RequestMapping("/feeds/{page}")
+	public Page<Article> getFeeds(@PathVariable int page){
+		return articleService.getFeeds(page);
+	}
+
+	@RequestMapping("/feeds")
+	public Page<Article> getFeeds(){
+		return getFeeds(0);
+	}
+
+	@RequestMapping("/article/{article_id}/comments/{page}")
+	public Page<Comment> getCommentsOfArticle(
+			@PathVariable int article_id,
+			@PathVariable int page){
+		return commentService.findCommentsOfArticle(article_id, page);
+	}
+
+	@RequestMapping("/article/{article_id}/comments")
+	public Page<Comment> getCommentsOfArticle(
+			@PathVariable int article_id){
+		return commentService.findCommentsOfArticle(article_id, 0);
+	}
+
+	@RequestMapping(value = "/article/{article_id}/comments", method = RequestMethod.POST)
+	public Comment postComment(
+			@PathVariable int article_id,
+			@RequestParam String text,
+			HttpServletRequest request){
+		User me = getCurrentUser(request);
+		Article article = articleService.findOne(article_id);
+		Comment comment = new Comment();
+		comment.setAuthor(me);
+		comment.setArticle(article);
+		comment.setText(text);
+		return commentService.save(comment);
 	}
 }

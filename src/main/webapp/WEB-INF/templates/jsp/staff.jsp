@@ -27,8 +27,8 @@
 			<div id="navbar" class="collapse navbar-collapse">
 				<ul class="nav navbar-nav">
 					<li class="active"><a href="#">Staff</a></li>
-					<li><a href="#about">Members</a></li>
-					<li><a href="#contact">Settings</a></li>
+					<li><a href="users">Users</a></li>
+					<li><a href="feeds">Feeds</a></li>
 				</ul>
 			</div>
 		</div>
